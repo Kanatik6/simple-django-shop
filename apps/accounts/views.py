@@ -1,21 +1,27 @@
-from rest_framework.viewsets import ReadOnlyModelViewSet
+from rest_framework.viewsets import GenericViewSet
 from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticatedOrReadOnly
+from rest_framework.permissions import IsAuthenticated
 from rest_framework import generics
 
 from django.contrib.auth import get_user_model
 
 from apps.accounts.serializers import UserSerializer, RegistrationSerializer
-from apps.accounts.mixins import AddFavoriteMixin,RemoveFavoriteMixin
+from apps.accounts.mixins import AddFavoriteMixin,RemoveFavoriteMixin,GetCurrentUserMixin
 
 
 User = get_user_model()
 
-class UserModelViewSet(ReadOnlyModelViewSet,AddFavoriteMixin,RemoveFavoriteMixin):
+class UserModelViewSet(
+    GenericViewSet,
+    AddFavoriteMixin,
+    RemoveFavoriteMixin,
+    GetCurrentUserMixin
+    ):
     queryset = get_user_model().objects.all()
     serializer_class = UserSerializer
-    permission_classes = [IsAuthenticatedOrReadOnly]
-
+    permission_classes = [IsAuthenticated]
+    
+    
 
 class RegistrationAPIView(generics.GenericAPIView):
     serializer_class = RegistrationSerializer
