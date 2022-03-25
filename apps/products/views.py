@@ -55,57 +55,8 @@ class CartProductView(
     serializer_class = CartProductSerializer
     permission_classes = [IsAuthenticated]
 
-    def create(self, request, *args, **kwargs):
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-
-        product = serializer.validated_data["product"]
-        if serializer.validated_data["amount"] > product.amount:
-            return Response(
-                {"message": "items in stock fewer  than you want to buy"},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-        product.amount -= serializer.validated_data["amount"]
-        product.save()
-
-        self.perform_create(serializer=serializer)
-        serializer.save()
-
-        headers = self.get_success_headers(serializer.data)
-        return Response(
-            serializer.data, status=status.HTTP_201_CREATED, headers=headers
-        )
-
-    def perform_create(self, serializer):
-        cart = Cart.objects.filter(user=self.request.user.id).first()
-        serializer.save(cart=cart)
-
 
 class OrderViewSet(ModelViewSet):
     queryset = Order.objects.all()
     serializer_class = OrderSerializer
     permission_classes = [IsAuthenticated]
-
-    def create(self, request, *args, **kwargs):
-        user = self.request.user
-        cart = Cart.objects.filter(user=user.id).first()
-        cart_products = cart.cart_products.all()
-        if cart_products.first() == None:
-            return Response({"message": "your cart is empty, fill her and try again"})
-
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        data = serializer.validated_data
-
-        order = Order.objects.create(
-            name=data.get("name"),
-            number=data.get("number"),
-            address=data.get("address"),
-            descriptions=data.get("descriptions"),
-            price=cart.total_price,
-            user=user,
-        )
-        serializer = self.get_serializer(order)
-        cart.cart_products.all().delete()
-
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
