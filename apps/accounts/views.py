@@ -20,8 +20,8 @@ class UserModelViewSet(
     queryset = get_user_model().objects.all()
     serializer_class = UserSerializer
     permission_classes = [IsAuthenticated]
-    
-    
+
+
 
 class RegistrationAPIView(generics.GenericAPIView):
     serializer_class = RegistrationSerializer

@@ -4,6 +4,10 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework import mixins, status
 
+from django_filters import rest_framework as filters
+
+from apps.products.filters import ProductFilterSet
+
 from apps.products.models import (
     CartProduct, 
     Category,
@@ -22,6 +26,8 @@ from apps.products.serializers import (
 class ProductViewSet(ModelViewSet):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
+    filter_backends = (filters.DjangoFilterBackend,)
+    filterset_class = ProductFilterSet
 
 
 class CartReadView(
