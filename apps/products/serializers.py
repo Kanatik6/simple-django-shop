@@ -68,8 +68,12 @@ class CartProductSerializer(serializers.ModelSerializer):
         product.amount -= validated_data["amount"]
         product.save()
 
-        Product = self.Meta.model
-        instance = Product._default_manager.create(cart=cart, **validated_data)
+        CartProduct = self.Meta.model
+        instance = CartProduct.objects.filter(product=product,cart=cart).first()
+
+        if not instance:
+            instance = CartProduct._default_manager.create(cart=cart, **validated_data)
+
         return instance
 
 
